@@ -1,0 +1,6 @@
+requests
+pandas
+pydantic>=2
+python-dotenv
+pyotp
+kiteconnect

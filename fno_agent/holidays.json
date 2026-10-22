@@ -1,0 +1,4 @@
+{
+  "_comment": "NSE/BSE trading holidays (YYYY-MM-DD). Update yearly from the NSE holiday circular. Weekends are handled automatically.",
+  "holidays": []
+}

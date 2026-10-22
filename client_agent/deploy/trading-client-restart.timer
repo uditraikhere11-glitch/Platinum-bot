@@ -1,0 +1,10 @@
+# Fires trading-client-restart.service at 08:45 IST on weekdays, whatever the VM's timezone.
+[Unit]
+Description=Restart equity trading client every weekday at 08:45 IST
+
+[Timer]
+OnCalendar=Mon..Fri 08:45 Asia/Kolkata
+Persistent=false
+
+[Install]
+WantedBy=timers.target

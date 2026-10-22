@@ -1,0 +1,19 @@
+# Dedicated Telegram input service. It writes signals to SQLite; it does not place orders.
+[Unit]
+Description=Darvas Telegram Signal Listener (SQLite queue)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=YOUR_USER
+WorkingDirectory=/home/YOUR_USER/darvas_script
+Environment=PYTHONUNBUFFERED=1
+Environment=TZ=Asia/Kolkata
+ExecStart=/home/YOUR_USER/darvas_script/.venv/bin/python /home/YOUR_USER/darvas_script/telegram_listener.py
+Restart=always
+RestartSec=5
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

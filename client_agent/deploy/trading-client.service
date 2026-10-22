@@ -1,0 +1,18 @@
+# systemd unit for the equity execution client (client_agent/client.py).
+# Installed by client_agent/deploy/setup.sh, which fills in YOUR_USER and the repo path. Control it with `bot`.
+[Unit]
+Description=Equity trading signal execution client
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=YOUR_USER
+WorkingDirectory=/home/YOUR_USER/darvas_script/client_agent
+ExecStart=/home/YOUR_USER/darvas_script/.venv/bin/python client.py /home/YOUR_USER/darvas_script/client_agent/.env
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

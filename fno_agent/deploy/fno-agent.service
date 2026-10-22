@@ -1,0 +1,19 @@
+# systemd unit for the FnO agent.
+# Installed by fno_agent/deploy/setup.sh, which fills in YOUR_USER and the repo path. Control it with `bot`.
+[Unit]
+Description=FnO signal execution agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=YOUR_USER
+WorkingDirectory=/home/YOUR_USER/darvas_script
+ExecStart=/home/YOUR_USER/darvas_script/.venv/bin/python -m fno_agent.main fno_agent/.env
+Restart=always
+RestartSec=10
+Environment=PYTHONUNBUFFERED=1
+Environment=TZ=Asia/Kolkata
+
+[Install]
+WantedBy=multi-user.target

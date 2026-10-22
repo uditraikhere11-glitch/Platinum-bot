@@ -1,0 +1,7 @@
+# One-shot: restart the equity client (fresh Dhan login + fresh scrip master before market open).
+[Unit]
+Description=Daily pre-market restart of the equity trading client
+
+[Service]
+Type=oneshot
+ExecStart=/bin/systemctl restart trading-client.service
