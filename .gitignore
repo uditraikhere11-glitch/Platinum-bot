@@ -1,0 +1,31 @@
+.env
+__pycache__/
+*userbot*
+.env*
+.checkpoint*
+.last_date*
+temp_media/
+credentials.json
+temp
+.test-env
+!.env.example
+fno_agent/logs/
+fno_agent/*.db
+fno_agent/.kite_token
+client_agent/.pending_protection.json*
+
+# Runtime queue and local persistent state
+runtime/
+*.db-wal
+*.db-shm
+
+# Broker journals and local databases must stay out of source control
+*.db
+
+# Local tooling, Telegram sessions, and deployment-generated state
+.pytest_cache/
+.venv/
+*.session
+*.session-journal
+*.log
+logs/
