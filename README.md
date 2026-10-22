@@ -95,22 +95,41 @@ The Bot must be a member of both output groups/channels and have permission to p
 
 For the listener only, `LOG_GROUP_ID` remains as a legacy fallback for the live log destination using the Telethon user session. Prefer the Bot API token and two explicit destinations for consistent logs from every process.
 
+## Guided chronological setup
+
+For a new VM or a complete reconfiguration, use the master wizard from the repository root:
+
+```bash
+bash deploy/setup_vm.sh
+```
+
+Run it as the normal VM login user, **not** with `sudo`; the component installers use `sudo` only for system-level operations. The wizard runs the components in dependency order and calls out each environment file before that stage:
+
+1. **Telegram listener + shared SQLite queue — root `.env`.** Enter/verify `TG_API_ID`, `TG_API_HASH`, `TG_SESSION_STRING`, `CHANNEL_MAPPINGS`, `DARVAS_SIGNAL_DB`, `LIVE_TRADING_ENABLED=false`, the logging bot token, and TEST/LIVE log chat IDs. The Telethon source mapping must be configured before the listener can start.
+2. **Equity executor — `client_agent/.env`.** Enter broker selection and credentials, investment amount, dry-run mode, and optional stop-loss/target settings. Keep `DRY_RUN=true`.
+3. **FnO executor — `fno_agent/.env`.** Enter broker selection and credentials, capital per trade, maximum lots, expiry guard, dry-run mode, and protective exits. Keep `DRY_RUN=true` and start with a conservative lot cap.
+4. **Final checks.** Confirm all three files use the same absolute `DARVAS_SIGNAL_DB` value, then inspect service status and logs.
+
+The listener is a prerequisite for both executor setup scripts. If an executor is selected without the listener, the wizard includes the listener stage first. It refuses to proceed when the global `LIVE_TRADING_ENABLED` gate is enabled, when a selected executor already has `DRY_RUN=false`, or when the checkout ownership would prevent safe writes.
+
+### Manual component setup
+
+The component scripts can still be used individually when needed:
+
+```bash
+bash deploy/setup_telegram_listener.sh
+bash client_agent/deploy/setup.sh
+bash fno_agent/deploy/setup.sh
+```
+
+Run them in that order. Do not start the equity or FnO executor before the listener/queue and environment files are validated.
+
 ## Safe rollout
 
-1. Copy `.env.example` to `.env`; keep `LIVE_TRADING_ENABLED=false`.
-2. Configure Telegram API credentials and test/live channel mappings. Set bot token and test/live log chat IDs.
-3. Start the dedicated listener:
-   ```bash
-   bash deploy/setup_telegram_listener.sh
-   ```
-4. Set up equity and FnO workers only if needed:
-   ```bash
-   bash client_agent/deploy/setup.sh
-   bash fno_agent/deploy/setup.sh
-   ```
-5. Keep `DRY_RUN=true` in each worker and post a test signal in a `mode="test"` source channel. Confirm the test Telegram log gets both message and parser-preview entries and `python signal_queue.py status` does not show a queue increase from that test message.
-6. Validate live-source parsing while `LIVE_TRADING_ENABLED=false`. The live log should explicitly report that queueing is blocked.
-7. Before real orders, configure the intended live source(s), verify broker sessions and risk limits, set worker `DRY_RUN=false` only for the relevant worker, then explicitly enable the gate with `bot gate on` (type `ENABLE LIVE QUEUE`). `bot gate off` stops future live queue inserts but does not cancel signals already queued.
+1. Keep `LIVE_TRADING_ENABLED=false` and `DRY_RUN=true` in both executor files through setup and testing.
+2. Post a test signal in a `mode="test"` source channel. Confirm the TEST log receives the source-message and parser-preview entries, and `python signal_queue.py status` does not show a queue increase caused by the test message.
+3. Validate a LIVE-source parser decision while `LIVE_TRADING_ENABLED=false`; the LIVE log should explicitly report that queueing is blocked. A LIVE source mapping can be added later; it is not required to validate the TEST source.
+4. Before real orders, verify broker sessions, channel allow-flags, pending queue state, risk limits, and protective exits. Only then set `DRY_RUN=false` for the relevant worker and explicitly enable the global gate with `bot gate on` (type `ENABLE LIVE QUEUE`). `bot gate off` stops future live queue inserts but does not cancel signals already queued.
 
 ## Deployment services and common commands
 
